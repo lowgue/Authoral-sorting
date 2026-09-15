@@ -1,22 +1,58 @@
 """
-Algoritmo Autoral de Referência: Dual-Pivot Extremes Sieve Sort (DPES).
+Algoritmo Autoral 1: Ordenação em Ondas de Fusão (Wave-Merge Sort).
 
 Raciocínio Projetual:
-1. Identifica em O(N) os extremos locais (mínimo e máximo).
-2. Se min == max, o array possui todos os elementos idênticos -> encerra imediatamente em O(N).
-3. Fixa min na extremidade esquerda e max na extremidade direita.
-4. Calcula dois pivôs adaptativos por interpolação de faixa de valores (p1, p2).
-5. Realiza particionamento triplo convergente in-place (esquerda, centro, direita).
-6. Aplica Insertion Sort otimizado para partições de tamanho <= 16 (threshold de sobrecarga).
+1. Divide o vetor em blocos-base de tamanho BLOCK_SIZE e ordena cada bloco
+   isoladamente com inserção binária: a busca binária descobre a posição de
+   inserção em O(log k) comparações, o deslocamento físico continua O(k).
+2. Combina os blocos via merge sort bottom-up: a cada rodada (a "onda"), a
+   largura dos blocos ordenados dobra, com buffer auxiliar O(n).
+3. Avanço rápido: durante a fusão, quando um mesmo lado vence
+   GALLOP_THRESHOLD comparações consecutivas, ativa-se uma busca binária
+   nesse lado para descobrir até onde ele avança antes de o outro lado
+   voltar a competir, copiando o trecho inteiro em uma única operação.
+
+Fusão estrutural: as três peças existem na literatura (inserção binária,
+merge sort e o "galope"/galloping do Timsort), mas o gatilho e o
+comportamento do avanço rápido são aplicados aqui a blocos artificialmente
+criados pelo próprio algoritmo — não a runs naturais do vetor de entrada.
+
+Complexidade:
+    Pior caso: O(n log n) (blocos entrelaçados, avanço rápido nunca dispara).
+    Melhor caso: O(n log n) cópias, mas com O(n log k) comparações quando
+    os blocos estão bem separados (avanço rápido dispara com frequência).
+Espaço auxiliar: O(n). Estabilidade: estável.
+
+Contagem de movimentações: conta-se cada gravação de elemento em endereço
+de memória (escrita no buffer temporário + cópia de volta para o vetor), o
+que dá ~2 movimentações por elemento por nível de fusão. Essa convenção é
+estrita e exata, porém DIFERENTE da do Merge Sort clássico do pacote (que
+conta apenas o append na saída) — a razão observada é ~1,9. O relatório
+deve declarar explicitamente a convenção adotada em cada algoritmo.
 """
 
-from typing import Any, List, Tuple
+from typing import Any, Callable, List, Optional, Tuple
+
+BLOCK_SIZE = 32
+GALLOP_THRESHOLD = 3
 
 
-def dpes_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
+def wave_merge_sort(
+    arr: List[Any],
+    block_size: int = BLOCK_SIZE,
+    gallop_threshold: int = GALLOP_THRESHOLD,
+    step_cb: Optional[Callable[[List[Any], int, int], None]] = None,
+) -> Tuple[List[Any], int, int]:
     """
-    Dual-Pivot Extremes Sieve Sort (DPES).
-    
+    Ordenação em Ondas de Fusão (Wave-Merge Sort).
+
+    Parâmetros:
+        arr: lista de entrada.
+        block_size: tamanho dos blocos-base da inserção binária.
+        gallop_threshold: vitórias seguidas que ativam o avanço rápido.
+        step_cb: callback (a, comps, moves) chamado após cada mutação
+                 visível do vetor (usado pelo visualizador em tempo real).
+
     Retorna:
         Tuple[List[Any], int, int]: (lista_ordenada, comparacoes, movimentacoes)
     """
@@ -27,118 +63,117 @@ def dpes_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
 
     comps = [0]
     moves = [0]
-    INSERTION_THRESHOLD = 16
 
-    def _insertion_sort(low: int, high: int) -> None:
+    def _notify() -> None:
+        if step_cb is not None:
+            step_cb(a, comps[0], moves[0])
+
+    def _binary_insertion(low: int, high: int) -> None:
         for i in range(low + 1, high + 1):
             key = a[i]
-            moves[0] += 1
-            j = i - 1
-            while j >= low:
+            lo = low
+            hi = i
+            while lo < hi:
                 comps[0] += 1
-                if a[j] > key:
-                    a[j + 1] = a[j]
-                    moves[0] += 1
-                    j -= 1
+                mid = (lo + hi) // 2
+                if a[mid] <= key:
+                    lo = mid + 1
                 else:
-                    break
-            a[j + 1] = key
+                    hi = mid
+            for j in range(i, lo, -1):
+                a[j] = a[j - 1]
+                moves[0] += 1
+                _notify()
+            a[lo] = key
             moves[0] += 1
+            _notify()
 
-    def _sort_recursive(low: int, high: int) -> None:
-        if low >= high:
-            return
+    def _gallop_merge(left: int, mid: int, right: int, tmp: List[Any]) -> None:
+        i = left
+        j = mid + 1
+        k = left
+        streak_left = 0
+        streak_right = 0
 
-        size = high - low + 1
-        if size <= INSERTION_THRESHOLD:
-            _insertion_sort(low, high)
-            return
-
-        # 1. Encontrar mínimo e máximo no intervalo
-        min_idx = low
-        max_idx = low
-        for k in range(low + 1, high + 1):
+        while i <= mid and j <= right:
             comps[0] += 1
-            if a[k] < a[min_idx]:
-                min_idx = k
-            comps[0] += 1
-            if a[k] > a[max_idx]:
-                max_idx = k
+            if a[i] <= a[j]:
+                tmp[k] = a[i]
+                moves[0] += 1
+                k += 1
+                i += 1
+                streak_left += 1
+                streak_right = 0
 
-        # Se todos os elementos do segmento forem iguais
-        if a[min_idx] == a[max_idx]:
-            comps[0] += 1
-            return
-
-        # 2. Posicionar min no início (low) e max no final (high)
-        if min_idx != low:
-            a[low], a[min_idx] = a[min_idx], a[low]
-            moves[0] += 2
-            # Se o max_idx era o low original, atualiza o índice do max
-            if max_idx == low:
-                max_idx = min_idx
-
-        if max_idx != high:
-            a[high], a[max_idx] = a[max_idx], a[high]
-            moves[0] += 2
-
-        min_val = a[low]
-        max_val = a[high]
-
-        # 3. Interpolação adaptativa de pivôs (se numérico) ou mediana empírica
-        try:
-            span = max_val - min_val
-            p1 = min_val + span / 3
-            p2 = min_val + (2 * span) / 3
-        except TypeError:
-            # Fallback para elementos não aritméticos: seleção posicional
-            mid = low + size // 2
-            comps[0] += 1
-            if a[low] > a[mid]:
-                p1, p2 = a[mid], a[low]
-            else:
-                p1, p2 = a[low], a[mid]
-
-        # 4. Particionamento tripartite in-place no intervalo [low + 1, high - 1]
-        left = low + 1
-        curr = low + 1
-        right = high - 1
-
-        while curr <= right:
-            comps[0] += 1
-            if a[curr] < p1:
-                if curr != left:
-                    a[curr], a[left] = a[left], a[curr]
-                    moves[0] += 2
-                left += 1
-                curr += 1
-            else:
-                comps[0] += 1
-                if a[curr] > p2:
-                    while curr < right:
+                if streak_left >= gallop_threshold and i <= mid and j <= right:
+                    lo = i
+                    hi = mid + 1
+                    while lo < hi:
                         comps[0] += 1
-                        if a[right] > p2:
-                            right -= 1
+                        m = (lo + hi) // 2
+                        if a[m] <= a[j]:
+                            lo = m + 1
                         else:
-                            break
-                    if curr != right:
-                        a[curr], a[right] = a[right], a[curr]
-                        moves[0] += 2
-                    right -= 1
+                            hi = m
+                    for t in range(i, lo):
+                        tmp[k] = a[t]
+                        moves[0] += 1
+                        k += 1
+                    i = lo
+                    streak_left = 0
+            else:
+                tmp[k] = a[j]
+                moves[0] += 1
+                k += 1
+                j += 1
+                streak_right += 1
+                streak_left = 0
 
-                    # Reavalia o elemento trazido de right
-                    comps[0] += 1
-                    if a[curr] < p1:
-                        if curr != left:
-                            a[curr], a[left] = a[left], a[curr]
-                            moves[0] += 2
-                        left += 1
-                curr += 1
+                if streak_right >= gallop_threshold and i <= mid and j <= right:
+                    lo = j
+                    hi = right + 1
+                    while lo < hi:
+                        comps[0] += 1
+                        m = (lo + hi) // 2
+                        if a[m] < a[i]:
+                            lo = m + 1
+                        else:
+                            hi = m
+                    for t in range(j, lo):
+                        tmp[k] = a[t]
+                        moves[0] += 1
+                        k += 1
+                    j = lo
+                    streak_right = 0
 
-        # 5. Chamadas recursivas para as 3 partições
-        _sort_recursive(low, left - 1)
-        _sort_recursive(left, right)
-        _sort_recursive(right + 1, high)
+        while i <= mid:
+            tmp[k] = a[i]
+            moves[0] += 1
+            k += 1
+            i += 1
+        while j <= right:
+            tmp[k] = a[j]
+            moves[0] += 1
+            k += 1
+            j += 1
 
-    _sort_recursive(0, n - 1)
+        for t in range(left, right + 1):
+            a[t] = tmp[t]
+            moves[0] += 1
+            _notify()
+
+    for low in range(0, n, block_size):
+        high = min(low + block_size, n) - 1
+        _binary_insertion(low, high)
+
+    tmp = [None] * n
+    width = block_size
+    while width < n:
+        for left in range(0, n, 2 * width):
+            mid = min(left + width - 1, n - 1)
+            right = min(left + 2 * width - 1, n - 1)
+            if mid < right:
+                _gallop_merge(left, mid, right, tmp)
+        width *= 2
+
     return a, comps[0], moves[0]

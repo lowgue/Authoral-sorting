@@ -7,7 +7,7 @@ import random
 import unittest
 from typing import Callable, List, Tuple
 
-from authorial import dpes_sort
+from authorial import wave_merge_sort
 from classical import (
     bubble_sort,
     insertion_sort,
@@ -119,8 +119,8 @@ class TestQuickSort(unittest.TestCase, BaseSortMixin):
 
 
 class TestAuthorialSort(unittest.TestCase, BaseSortMixin):
-    sort_fn = staticmethod(dpes_sort)
-    name = "Authorial Sort (DPES)"
+    sort_fn = staticmethod(wave_merge_sort)
+    name = "Authorial (Ondas de Fusão)"
 
 
 if __name__ == "__main__":

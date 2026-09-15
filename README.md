@@ -1,74 +1,97 @@
 # Pacote de Códigos e Benchmarks — TP1 (APA)
 
-Este diretório contém a implementação dos algoritmos de ordenação clássicos, o algoritmo autoral de referência (**DPES - Dual-Pivot Extremes Sieve Sort**), a suíte de testes de validação obrigatória e o framework de medição de desempenho e gráficos em **Python 3** e **C++17**.
-
----
+Implementação do algoritmo de ordenação **autoral** (Ondas de Fusão, `wave_merge_sort`), dos clássicos instrumentados e o framework de validação e medição de desempenho, em **Python 3** e **C++17**.
 
 ## 📂 Estrutura de Arquivos
 
 ```text
-codigo/
-├── Makefile                          # Automação de compilação, testes e benchmarks
-├── README.md                         # Este guia de execução e desenvolvimento
+├── Makefile                          # Automação de testes e benchmarks
+├── README.md                         # Este guia
 │
-├── python/                           # Implementação em Python 3
+├── python/
+│   ├── authorial.py                  # Algoritmo autoral (Ondas de Fusão)
 │   ├── classical.py                  # Algoritmos clássicos (Bubble, Selection, Insertion, Merge, Quick)
-│   ├── authorial.py                  # Algoritmo autoral de referência (DPES)
-│   ├── metrics.py                    # Instrumentação (contagem de comparações, trocas e tempos)
-│   ├── test_suite.py                 # Suíte com todos os cenários de teste obrigatórios (unittest)
-│   ├── benchmark.py                  # Framework de benchmark com geração de gráficos matplotlib
-│   └── student_template.py           # Template inicial para o aluno desenvolver seu algoritmo
+│   ├── test_suite.py                 # Suíte de testes obrigatória (unittest)
+│   ├── test_comprehensive.py         # Suíte abrangente (fuzz, sweeps, adversariais, estabilidade)
+│   ├── benchmark.py                  # Benchmark com tabelas Markdown e gráficos matplotlib
+│   ├── visualizer.py                 # Animação da ordenação no terminal
+│   ├── metrics.py                    # Instrumentação (comparações, trocas, tempos)
+│   └── student_template.py           # Template de estudo
 │
-└── cpp/                              # Implementação em C++17 (Alta Performance)
-    ├── classical.hpp / .cpp          # Algoritmos clássicos instrumentados
-    ├── authorial.hpp / .cpp          # Algoritmo autoral DPES em C++
-    ├── test_runner.cpp               # Testes unitários com asserções em C++
-    └── benchmark.cpp                 # Benchmark estatístico de alta resolução em C++
+├── cpp/                              # Legado do pacote base (clássicos + DPES de referência)
+│   ├── classical.hpp/.cpp            # Algoritmos clássicos instrumentados
+│   ├── authorial.hpp/.cpp            # DPES (referência do pacote, NÃO é o autoral atual)
+│   ├── test_runner.cpp               # Testes unitários em C++
+│   └── benchmark.cpp                 # Benchmark em C++
+│
+├── results/                          # Saídas analíticas (tabelas e gráficos do relatório)
+└── docs/declaracao-ia.md             # Declaração obrigatória de autoria e uso de IA
 ```
 
----
+> Obs.: o `cpp/` implementa DPES, algoritmo de referência do pacote base, que **não** corresponde ao autoral atual em Python. A paridade entre C++ e o autoral não é garantida.
 
 ## 🚀 Como Executar
 
-### 1. Suíte de Testes Obrigatória
+### 1. Suíte de Testes
 
-* **Executar testes em Python:**
+* **Obrigatória (cenários do enunciado):**
   ```bash
   make test_python
   # ou: python3 python/test_suite.py
   ```
 
-* **Compilar e executar testes em C++:**
+* **Abrangente (fuzz, sweeps de parâmetros, casos adversariais, estabilidade):**
+  ```bash
+  make test_python_full
+  # ou: python3 python/test_comprehensive.py -v
+  ```
+
+* **Teste individual:**
+  ```bash
+  python3 python/test_suite.py TestQuickSort.test_05_all_identical_elements
+  ```
+
+* **C++:**
   ```bash
   make test_cpp
   ```
 
----
+### 2. Benchmarks e Visualização
 
-### 2. Benchmarks e Comparação de Desempenho
-
-* **Executar benchmarks em Python (Gera tabelas Markdown e o gráfico `benchmark_results.png`):**
+* **Benchmark Python** — tabelas Markdown + gráfico `benchmark_results.png`:
   ```bash
   make benchmark_python
-  # ou: python3 python/benchmark.py --trials 3 --plot benchmark_results.png
+  # ou: .venv/bin/python3 python/benchmark.py --trials 3
   ```
 
-* **Executar benchmarks em C++:**
+* **Animação no terminal** (visualize o autoral ou os clássicos passo a passo):
+  ```bash
+  make visualize
+  # ou: .venv/bin/python3 python/visualizer.py --algorithm wave --size 48
+  ```
+
+* **Benchmark C++:**
   ```bash
   make run_benchmark_cpp
   ```
 
----
+### 3. Instalação de Dependências
 
-## 🧑‍💻 Guia para o Aluno (Como usar o template)
+Só o `matplotlib>=3.7` é necessário (apenas para benchmark/visualização):
 
-1. Abra o arquivo [`python/student_template.py`](file:///home/diogo/447658-ANALISE-E-PROJETOS-DE-ALGORITMOS/02-Semana-2-%2803-09-04-09%29/codigo/python/student_template.py).
-2. Escreva a lógica do seu algoritmo na função `my_authorial_sort(arr)`.
-3. Certifique-se de incrementar os contadores de comparações (`comps`) e movimentações (`moves`).
-4. Execute o arquivo diretamente para validar seu algoritmo contra a suíte de testes:
-   ```bash
-   python3 python/student_template.py
-   ```
-5. Para comparar seu algoritmo diretamente contra a literatura no benchmark gráfico:
-   * Importe seu método no `python/benchmark.py` e adicione ao dicionário `algorithms`.
-   * Execute `python3 python/benchmark.py` para gerar as curvas de tempo e comparações para o seu relatório ou apresentação!
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+```
+
+## 🧑‍💻 Algoritmo Autoral — Ondas de Fusão (`wave_merge_sort`)
+
+Blocos-base ordenados com inserção binária, combinados por fusão bottom-up
+(a cada "onda" a largura dos blocos dobra) e com avanço rápido (busca
+binária + cópia em bloco) quando um lado vence comparações consecutivas.
+
+* **Pior caso:** O(n log n) · **Melhor caso:** O(n log n) cópias com O(n log k) comparações
+* **Espaço auxiliar:** O(n) · **Estável:** sim
+
+> A contagem de `moves` é **por convenção**: `wave_merge_sort` conta cada
+> gravação em endereço de memória (buffer + cópia), ~2× a do Merge Sort
+> clássico (que conta só o append). Detalhe na docstring de `python/authorial.py`.

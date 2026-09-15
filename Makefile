@@ -30,10 +30,16 @@ run_benchmark_cpp: benchmark_cpp
 test_python:
 	python3 python/test_suite.py
 
+test_python_full:
+	python3 python/test_comprehensive.py -v
+
+visualize:
+	python3 python/visualizer.py
+
 benchmark_python:
 	python3 python/benchmark.py --trials 3
 
 clean:
 	rm -rf $(BUILD_DIR) *.png
 
-.PHONY: all test_cpp benchmark_cpp run_benchmark_cpp test_python benchmark_python clean
+.PHONY: all test_cpp benchmark_cpp run_benchmark_cpp test_python test_python_full visualize benchmark_python clean

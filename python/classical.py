@@ -6,7 +6,10 @@ Cada função retorna (lista_ordenada, comparacoes, movimentacoes).
 from typing import Any, List, Tuple
 
 
-def bubble_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
+def bubble_sort(
+    arr: List[Any],
+    step_cb: Any = None,
+) -> Tuple[List[Any], int, int]:
     """
     Bubble Sort com otimização de parada antecipada.
     Complexidade: Melhor O(n), Pior O(n²), Médio O(n²).
@@ -25,13 +28,18 @@ def bubble_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
                 a[j], a[j + 1] = a[j + 1], a[j]
                 moves += 2
                 swapped = True
+                if step_cb is not None:
+                    step_cb(a, comps, moves)
         if not swapped:
             break
 
     return a, comps, moves
 
 
-def selection_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
+def selection_sort(
+    arr: List[Any],
+    step_cb: Any = None,
+) -> Tuple[List[Any], int, int]:
     """
     Selection Sort.
     Complexidade: Melhor O(n²), Pior O(n²), Médio O(n²).
@@ -51,11 +59,16 @@ def selection_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
         if min_idx != i:
             a[i], a[min_idx] = a[min_idx], a[i]
             moves += 2
+            if step_cb is not None:
+                step_cb(a, comps, moves)
 
     return a, comps, moves
 
 
-def insertion_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
+def insertion_sort(
+    arr: List[Any],
+    step_cb: Any = None,
+) -> Tuple[List[Any], int, int]:
     """
     Insertion Sort linear.
     Complexidade: Melhor O(n), Pior O(n²), Médio O(n²).
@@ -76,10 +89,14 @@ def insertion_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
                 a[j + 1] = a[j]
                 moves += 1
                 j -= 1
+                if step_cb is not None:
+                    step_cb(a, comps, moves)
             else:
                 break
         a[j + 1] = key
         moves += 1
+        if step_cb is not None:
+            step_cb(a, comps, moves)
 
     return a, comps, moves
 
@@ -136,7 +153,10 @@ def merge_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
     return result, comps[0], moves[0]
 
 
-def quick_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
+def quick_sort(
+    arr: List[Any],
+    step_cb: Any = None,
+) -> Tuple[List[Any], int, int]:
     """
     Quick Sort com partição de Hoare e escolha de pivô mediana de três.
     Complexidade: Melhor O(n log n), Pior O(n²), Médio O(n log n).
@@ -150,18 +170,25 @@ def quick_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
     comps = [0]
     moves = [0]
 
+    def _notify() -> None:
+        if step_cb is not None:
+            step_cb(a, comps[0], moves[0])
+
     def _median_of_three(low: int, high: int) -> int:
         mid = (low + high) // 2
         comps[0] += 3
         if a[low] > a[mid]:
             a[low], a[mid] = a[mid], a[low]
             moves[0] += 2
+            _notify()
         if a[low] > a[high]:
             a[low], a[high] = a[high], a[low]
             moves[0] += 2
+            _notify()
         if a[mid] > a[high]:
             a[mid], a[high] = a[high], a[mid]
             moves[0] += 2
+            _notify()
         return mid
 
     def _quick_sort_rec(low: int, high: int) -> None:
@@ -192,6 +219,7 @@ def quick_sort(arr: List[Any]) -> Tuple[List[Any], int, int]:
                 if i != j:
                     a[i], a[j] = a[j], a[i]
                     moves[0] += 2
+                    _notify()
                 i += 1
                 j -= 1
 
