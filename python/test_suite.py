@@ -8,6 +8,7 @@ import unittest
 from typing import Callable, List, Tuple
 
 from authorial import wave_merge_sort
+from pfa_authorial import pfa_sort
 from classical import (
     bubble_sort,
     insertion_sort,
@@ -121,6 +122,42 @@ class TestQuickSort(unittest.TestCase, BaseSortMixin):
 class TestAuthorialSort(unittest.TestCase, BaseSortMixin):
     sort_fn = staticmethod(wave_merge_sort)
     name = "Authorial (Ondas de Fusão)"
+
+
+class TestPFASort(unittest.TestCase, BaseSortMixin):
+    """PFA é O(n⁴); todos os testes com inversões usam N ≤ 50 para viabilidade."""
+    sort_fn = staticmethod(pfa_sort)
+    name = "PFA (Pressure-Field Adjacent)"
+
+    def test_04_strictly_reverse_sorted(self):
+        """Pior caso / Estresse — N=50 (reverso N=100 leva ~2s; PFA é O(n⁴))"""
+        data = list(range(50, 0, -1))
+        res, _, _ = self.sort_fn(data)
+        self.assert_sorted(data, res)
+
+    def test_06_many_duplicates(self):
+        """Colisão com repetições — N=50 (duplicatas N=200 levam ~11s; PFA é O(n⁴))"""
+        import random as _rnd
+        _rnd.seed(42)
+        data = [_rnd.choice([1, 2, 3, 4, 5]) for _ in range(50)]
+        res, _, _ = self.sort_fn(data)
+        self.assert_sorted(data, res)
+
+    def test_09_random_uniform_medium(self):
+        """Vetores aleatórios médios — N=75 (PFA é O(n⁴); N=1000 inviável em teste unitário)"""
+        import random as _rnd
+        _rnd.seed(456)
+        data = [_rnd.randint(-10000, 10000) for _ in range(75)]
+        res, _, _ = self.sort_fn(data)
+        self.assert_sorted(data, res)
+
+    def test_10_almost_sorted(self):
+        """Vetor quase ordenado — N=50 (PFA é O(n⁴); tamanho reduzido para viabilidade)"""
+        data = list(range(50))
+        for i in (5, 25, 40):
+            data[i], data[i + 1] = data[i + 1], data[i]
+        res, _, _ = self.sort_fn(data)
+        self.assert_sorted(data, res)
 
 
 if __name__ == "__main__":

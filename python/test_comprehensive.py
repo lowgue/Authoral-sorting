@@ -19,6 +19,7 @@ import unittest
 from typing import Any, Callable, List, Tuple
 
 from authorial import wave_merge_sort
+from pfa_authorial import pfa_sort
 from classical import (
     bubble_sort,
     insertion_sort,
@@ -35,6 +36,7 @@ ALL_ALGORITHMS: List[Tuple[str, Callable[[List], Tuple[List, int, int]]]] = [
     ("Selection Sort", selection_sort),
     ("Bubble Sort", bubble_sort),
     ("Authorial (Ondas de Fusão)", wave_merge_sort),
+    ("PFA (Pressure-Field Adjacent)", pfa_sort),
 ]
 
 

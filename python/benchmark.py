@@ -15,6 +15,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from authorial import wave_merge_sort
+from pfa_authorial import pfa_sort
 from classical import (
     bubble_sort,
     insertion_sort,
@@ -70,6 +71,9 @@ def run_benchmark(
                 # Para os O(n²) clássicos, evita tamanhos excessivos que demoram muito;
                 # as curvas de escalabilidade (>1000) ficam com os O(n log n).
                 if size > 1000 and name in ("Bubble Sort", "Selection Sort", "Insertion Sort"):
+                    continue
+                # PFA é O(n⁴) no pior caso; limita a N ≤ 250 para evitar timeouts.
+                if size > 250 and name == "PFA (Pressure-Field Adjacent)":
                     continue
 
                 times = []
@@ -166,6 +170,7 @@ def main():
         "Merge Sort": merge_sort,
         "Quick Sort": quick_sort,
         "Ondas de Fusão": wave_merge_sort,
+        "PFA (Pressure-Field Adjacent)": pfa_sort,
     }
 
     sizes = [10, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
