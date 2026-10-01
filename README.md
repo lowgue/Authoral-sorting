@@ -1,8 +1,8 @@
 # Pacote de Códigos e Benchmarks — TP1 (APA)
 
-Implementação do algoritmo de ordenação **autoral** (Ondas de Fusão, `wave_merge_sort`), dos clássicos instrumentados e o framework de validação e medição de desempenho, em **Python 3** e **C++17**.
+Este repositório contém a implementação do algoritmo de ordenação autoral "Ondas de Fusão" (`wave_merge_sort`), algoritmos clássicos de ordenação com instrumentação para análise de desempenho, além de um framework de validação e medição, desenvolvidos em **Python 3** e **C++17**.
 
-## 📂 Estrutura de Arquivos
+## Estrutura de Arquivos
 
 ```text
 ├── Makefile                          # Automação de testes e benchmarks
@@ -12,71 +12,71 @@ Implementação do algoritmo de ordenação **autoral** (Ondas de Fusão, `wave_
 ├── python/
 │   ├── authorial.py                  # Algoritmo autoral (Ondas de Fusão)
 │   ├── classical.py                  # Algoritmos clássicos (Bubble, Selection, Insertion, Merge, Quick)
-│   ├── test_suite.py                 # Suíte de testes obrigatória (unittest)
+│   ├── test_suite.py                 # Suíte de testes (unittest)
 │   ├── test_comprehensive.py         # Suíte abrangente (fuzz, sweeps, adversariais, estabilidade)
 │   ├── benchmark.py                  # Benchmark com tabelas Markdown e gráficos matplotlib
 │   ├── visualizer.py                 # Animação da ordenação no terminal
 │   ├── param_sweep.py                # Sweep de block_size x gallop_threshold (calibração do relatório)
 │   ├── metrics.py                    # Instrumentação (comparações, trocas, tempos)
-│   └── student_template.py           # Template de estudo
+│   └── student_template.py           # Template para estudo
 │
-├── cpp/                              # Legado do pacote base (clássicos + DPES de referência)
+├── cpp/                              # Código legado (clássicos + DPES de referência)
 │   ├── classical.hpp/.cpp            # Algoritmos clássicos instrumentados
-│   ├── authorial.hpp/.cpp            # DPES (referência do pacote, NÃO é o autoral atual)
+│   ├── authorial.hpp/.cpp            # DPES (referência, distinto do autoral atual)
 │   ├── test_runner.cpp               # Testes unitários em C++
 │   └── benchmark.cpp                 # Benchmark em C++
 │
 ├── latex/artigo.tex                  # Artigo científico do TP1 (self-contained, Overleaf)
-├── figuras/                          # Figuras do relatório
+├── figuras/                          # Figuras e ilustrações do relatório
 ├── results/                          # Saídas analíticas (tabelas, resumo e gráfico do relatório)
 │   ├── benchmark_results.png
 │   └── resumo_experimental.md
 └── docs/declaracao-ia.md             # Declaração obrigatória de autoria e uso de IA
 ```
 
-> Obs.: o `cpp/` implementa DPES, algoritmo de referência do pacote base, que **não** corresponde ao autoral atual em Python. A paridade entre C++ e o autoral não é garantida.
+> Observação: O diretório `cpp/` implementa o DPES, algoritmo de referência original do pacote base, o qual não corresponde à implementação autoral atual em Python. Não há paridade funcional garantida entre a versão C++ e a nova versão autoral.
 
-## 🚀 Como Executar
+## Como Executar
 
 ### 1. Suíte de Testes
 
-* **Obrigatória (cenários do enunciado):**
+* **Testes padrão (cenários do enunciado):**
   ```bash
   make test_python
   # ou: python3 python/test_suite.py
   ```
 
-* **Abrangente (fuzz, sweeps de parâmetros, casos adversariais, estabilidade):**
+* **Testes abrangentes (fuzzing, sweeps de parâmetros, casos adversariais e de estabilidade):**
   ```bash
   make test_python_full
   # ou: python3 python/test_comprehensive.py -v
   ```
 
-* **Teste individual:**
+* **Execução de um teste específico:**
   ```bash
   python3 python/test_suite.py TestQuickSort.test_05_all_identical_elements
   ```
 
-* **C++:**
+* **Testes em C++:**
   ```bash
   make test_cpp
   ```
 
 ### 2. Benchmarks e Visualização
 
-* **Benchmark Python** — tabelas Markdown + gráfico `benchmark_results.png`:
+* **Benchmark Python** — Gera tabelas Markdown e o gráfico `benchmark_results.png`:
   ```bash
   make benchmark_python
   # ou: .venv/bin/python3 python/benchmark.py --trials 3
   ```
 
-* **Animação no terminal** (visualize o autoral ou os clássicos passo a passo):
+* **Animação no Terminal** (visualização passo a passo da ordenação):
   ```bash
   make visualize
   # ou: .venv/bin/python3 python/visualizer.py --algorithm wave --size 48
   ```
 
-* **Sweep de parâmetros** do autoral (`block_size` x `gallop_threshold`):
+* **Sweep de parâmetros do algoritmo autoral** (`block_size` x `gallop_threshold`):
   ```bash
   .venv/bin/python3 python/param_sweep.py
   ```
@@ -86,33 +86,28 @@ Implementação do algoritmo de ordenação **autoral** (Ondas de Fusão, `wave_
   make run_benchmark_cpp
   ```
 
-> **Atenção:** os alvos `benchmark_python` e `visualize` do Makefile chamam `python3`
-> direto. Se o `python3` do sistema não tiver `matplotlib`, use `.venv/bin/python3`
-> nos exemplos acima. Os alvos de teste só usam a stdlib e rodam com `python3`.
+> **Atenção:** Os comandos `benchmark_python` e `visualize` do Makefile executam o interpretador `python3` do sistema. Caso este não possua a biblioteca `matplotlib` instalada, recomenda-se a execução através do ambiente virtual (`.venv/bin/python3`), conforme ilustrado nos exemplos. Os comandos de testes não possuem dependências externas além da biblioteca padrão do Python.
 
 ### 3. Instalação de Dependências
 
-Só o `matplotlib>=3.7` é necessário (apenas para benchmark/visualização/sweep):
+A execução de benchmarks, visualizações e sweeps de parâmetros exige a instalação da biblioteca `matplotlib>=3.7`. Para configurar o ambiente virtual, execute:
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
 ```
 
-## 🧑‍💻 Algoritmo Autoral — Ondas de Fusão (`wave_merge_sort`)
+## Algoritmo Autoral — Ondas de Fusão (`wave_merge_sort`)
 
-Blocos-base ordenados com inserção binária, combinados por fusão bottom-up
-(a cada "onda" a largura dos blocos dobra) e com avanço rápido (busca
-binária + cópia em bloco) quando um lado vence comparações consecutivas.
+O algoritmo baseia-se na ordenação de blocos por inserção binária combinados através de fusão bottom-up (em cada "onda", a largura dos blocos dobra). O algoritmo implementa um mecanismo de avanço rápido (busca binária combinada com cópia em bloco) otimizado para cenários onde um subarranjo vence comparações de forma consecutiva.
 
-* **Pior caso:** O(n log n) · **Melhor caso:** O(n log n) cópias com O(n log k) comparações
-* **Espaço auxiliar:** O(n) · **Estável:** sim
+* **Complexidade (Pior Caso):** O(n log n)
+* **Complexidade (Melhor Caso):** O(n log n) em movimentações e O(n log k) em comparações.
+* **Complexidade de Espaço (Auxiliar):** O(n)
+* **Estabilidade:** Garantida (Algoritmo Estável).
 
-> A contagem de `moves` é **por convenção**: `wave_merge_sort` conta cada
-> gravação em endereço de memória (buffer + cópia), ~2× a do Merge Sort
-> clássico (que conta só o append). Detalhe na docstring de `python/authorial.py`.
+> **Métrica de Movimentações (Moves):** A contagem de movimentações segue uma convenção específica. No algoritmo `wave_merge_sort`, cada gravação em memória (utilização de buffer e cópia posterior) é contabilizada, resultando em aproximadamente o dobro de movimentações registradas pelo Merge Sort clássico (que contabiliza apenas as inserções diretas). Detalhes adicionais estão descritos na documentação (docstring) de `python/authorial.py`.
 
-## 📄 Artigo (Relatório)
+## Artigo (Relatório)
 
-O relatório do TP1 é o arquivo único e self-contained `latex/artigo.tex`
-(pacotes padrão: `pgfplots`, `algorithm2e`, `booktabs`), pronto para importar
-no Overleaf. As tabelas e gráficos vêm de `results/`.
+O relatório correspondente ao TP1 é fornecido no arquivo `latex/artigo.tex`, o qual foi estruturado para ser autossuficiente e compatível com as plataformas LaTeX (como Overleaf). O documento utiliza pacotes padrão (`pgfplots`, `algorithm2e`, `booktabs`), importando tabelas e gráficos diretamente do diretório `results/`.
