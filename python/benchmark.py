@@ -72,8 +72,8 @@ def run_benchmark(
                 # as curvas de escalabilidade (>1000) ficam com os O(n log n).
                 if size > 1000 and name in ("Bubble Sort", "Selection Sort", "Insertion Sort"):
                     continue
-                # PFA é O(n⁴) no pior caso; limita a N ≤ 250 para evitar timeouts.
-                if size > 250 and name == "PFA (Pressure-Field Adjacent)":
+                # PFA é O(n⁴) no pior caso; limita a N ≤ 100 para evitar timeouts.
+                if size > 100 and name == "PFA (Pressure-Field Adjacent)":
                     continue
 
                 times = []

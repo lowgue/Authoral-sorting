@@ -7,6 +7,7 @@ Implementação do algoritmo de ordenação **autoral** (Ondas de Fusão, `wave_
 ```text
 ├── Makefile                          # Automação de testes e benchmarks
 ├── README.md                         # Este guia
+├── enunciado.md                      # Enunciado do TP1
 │
 ├── python/
 │   ├── authorial.py                  # Algoritmo autoral (Ondas de Fusão)
@@ -15,6 +16,7 @@ Implementação do algoritmo de ordenação **autoral** (Ondas de Fusão, `wave_
 │   ├── test_comprehensive.py         # Suíte abrangente (fuzz, sweeps, adversariais, estabilidade)
 │   ├── benchmark.py                  # Benchmark com tabelas Markdown e gráficos matplotlib
 │   ├── visualizer.py                 # Animação da ordenação no terminal
+│   ├── param_sweep.py                # Sweep de block_size x gallop_threshold (calibração do relatório)
 │   ├── metrics.py                    # Instrumentação (comparações, trocas, tempos)
 │   └── student_template.py           # Template de estudo
 │
@@ -24,7 +26,11 @@ Implementação do algoritmo de ordenação **autoral** (Ondas de Fusão, `wave_
 │   ├── test_runner.cpp               # Testes unitários em C++
 │   └── benchmark.cpp                 # Benchmark em C++
 │
-├── results/                          # Saídas analíticas (tabelas e gráficos do relatório)
+├── latex/artigo.tex                  # Artigo científico do TP1 (self-contained, Overleaf)
+├── figuras/                          # Figuras do relatório
+├── results/                          # Saídas analíticas (tabelas, resumo e gráfico do relatório)
+│   ├── benchmark_results.png
+│   └── resumo_experimental.md
 └── docs/declaracao-ia.md             # Declaração obrigatória de autoria e uso de IA
 ```
 
@@ -70,14 +76,23 @@ Implementação do algoritmo de ordenação **autoral** (Ondas de Fusão, `wave_
   # ou: .venv/bin/python3 python/visualizer.py --algorithm wave --size 48
   ```
 
+* **Sweep de parâmetros** do autoral (`block_size` x `gallop_threshold`):
+  ```bash
+  .venv/bin/python3 python/param_sweep.py
+  ```
+
 * **Benchmark C++:**
   ```bash
   make run_benchmark_cpp
   ```
 
+> **Atenção:** os alvos `benchmark_python` e `visualize` do Makefile chamam `python3`
+> direto. Se o `python3` do sistema não tiver `matplotlib`, use `.venv/bin/python3`
+> nos exemplos acima. Os alvos de teste só usam a stdlib e rodam com `python3`.
+
 ### 3. Instalação de Dependências
 
-Só o `matplotlib>=3.7` é necessário (apenas para benchmark/visualização):
+Só o `matplotlib>=3.7` é necessário (apenas para benchmark/visualização/sweep):
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
@@ -95,3 +110,9 @@ binária + cópia em bloco) quando um lado vence comparações consecutivas.
 > A contagem de `moves` é **por convenção**: `wave_merge_sort` conta cada
 > gravação em endereço de memória (buffer + cópia), ~2× a do Merge Sort
 > clássico (que conta só o append). Detalhe na docstring de `python/authorial.py`.
+
+## 📄 Artigo (Relatório)
+
+O relatório do TP1 é o arquivo único e self-contained `latex/artigo.tex`
+(pacotes padrão: `pgfplots`, `algorithm2e`, `booktabs`), pronto para importar
+no Overleaf. As tabelas e gráficos vêm de `results/`.
