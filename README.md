@@ -11,6 +11,7 @@ Este repositório contém a implementação do algoritmo de ordenação autoral 
 │
 ├── python/
 │   ├── authorial.py                  # Algoritmo autoral (Ondas de Fusão)
+│   ├── pfa_authorial.py              # Algoritmo autoral (Pressure-Field Adjacent Sort)
 │   ├── classical.py                  # Algoritmos clássicos (Bubble, Selection, Insertion, Merge, Quick)
 │   ├── test_suite.py                 # Suíte de testes (unittest)
 │   ├── test_comprehensive.py         # Suíte abrangente (fuzz, sweeps, adversariais, estabilidade)
@@ -97,7 +98,11 @@ python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
 
-## Algoritmo Autoral — Ondas de Fusão (`wave_merge_sort`)
+## Algoritmos Autorais
+
+O projeto conta com a implementação de dois algoritmos autorais:
+
+### 1. Ondas de Fusão (`wave_merge_sort`)
 
 O algoritmo baseia-se na ordenação de blocos por inserção binária combinados através de fusão bottom-up (em cada "onda", a largura dos blocos dobra). O algoritmo implementa um mecanismo de avanço rápido (busca binária combinada com cópia em bloco) otimizado para cenários onde um subarranjo vence comparações de forma consecutiva.
 
@@ -107,6 +112,15 @@ O algoritmo baseia-se na ordenação de blocos por inserção binária combinado
 * **Estabilidade:** Garantida (Algoritmo Estável).
 
 > **Métrica de Movimentações (Moves):** A contagem de movimentações segue uma convenção específica. No algoritmo `wave_merge_sort`, cada gravação em memória (utilização de buffer e cópia posterior) é contabilizada, resultando em aproximadamente o dobro de movimentações registradas pelo Merge Sort clássico (que contabiliza apenas as inserções diretas). Detalhes adicionais estão descritos na documentação (docstring) de `python/authorial.py`.
+
+### 2. Pressure-Field Adjacent Sort (PFA)
+
+O PFA modela o arranjo como um campo de pressão no qual cada elemento acumula tensão proporcional ao seu deslocamento em relação à posição ordenada. A cada iteração, o par adjacente invertido com maior pressão combinada é trocado. Essa estratégia foca em resolver as maiores instabilidades do vetor prioritariamente.
+
+* **Complexidade (Pior Caso):** O(n⁴) (quando o arranjo está em ordem reversa).
+* **Complexidade (Melhor Caso):** O(n) (quando o arranjo já está ordenado).
+* **Complexidade de Espaço:** O(n)
+* **Estabilidade:** Garantida (Algoritmo Estável).
 
 ## Algoritmos Clássicos
 
