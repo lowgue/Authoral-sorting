@@ -108,6 +108,21 @@ O algoritmo baseia-se na ordenação de blocos por inserção binária combinado
 
 > **Métrica de Movimentações (Moves):** A contagem de movimentações segue uma convenção específica. No algoritmo `wave_merge_sort`, cada gravação em memória (utilização de buffer e cópia posterior) é contabilizada, resultando em aproximadamente o dobro de movimentações registradas pelo Merge Sort clássico (que contabiliza apenas as inserções diretas). Detalhes adicionais estão descritos na documentação (docstring) de `python/authorial.py`.
 
+## Algoritmos Clássicos
+
+O pacote também inclui a implementação instrumentada dos seguintes algoritmos clássicos de ordenação, localizados em `python/classical.py`:
+* **Bubble Sort**: Implementação com otimização de parada antecipada.
+* **Selection Sort**: Implementação padrão in-place.
+* **Insertion Sort**: Inserção linear, algoritmo estável.
+* **Merge Sort**: Algoritmo clássico de divisão e conquista (Top-Down).
+* **Quick Sort**: Utiliza partição de Hoare e escolha de pivô baseada na mediana de três.
+
+Todos os algoritmos retornam uma tupla contendo o arranjo ordenado, o número de comparações e o número de movimentações, permitindo análise uniforme no framework de benchmarks.
+
+## Algoritmo Legado em C++ (DPES)
+
+O diretório `cpp/` abriga o algoritmo **Dual-Pivot Extremes Sieve Sort (DPES)**, que atuou como o algoritmo autoral de referência inicial (versão legada). Ele é mantido exclusivamente para portabilidade do pacote base em C++. Vale ressaltar que o DPES possui características distintas e **não** apresenta paridade de comportamento ou contagem de movimentações com o autoral atual (`wave_merge_sort`).
+
 ## Artigo (Relatório)
 
 O relatório correspondente ao TP1 é fornecido no arquivo `latex/artigo.tex`, o qual foi estruturado para ser autossuficiente e compatível com as plataformas LaTeX (como Overleaf). O documento utiliza pacotes padrão (`pgfplots`, `algorithm2e`, `booktabs`), importando tabelas e gráficos diretamente do diretório `results/`.
